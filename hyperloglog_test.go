@@ -77,9 +77,9 @@ func testHyperLogLog(t *testing.T, n, low_b, high_b int) {
 }
 
 func TestHyperLogLogSmall(t *testing.T) {
-	testHyperLogLog(t, 500, 4, 17)
+	testHyperLogLog(t, 5, 4, 31)
 }
 
 func TestHyperLogLogBig(t *testing.T) {
-	testHyperLogLog(t, 0, 18, 31)
+	testHyperLogLog(t, 0, 4, 31)
 }

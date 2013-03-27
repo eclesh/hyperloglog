@@ -18,7 +18,7 @@ Quick start
 	$ go get github.com/eclesh/hyperloglog
 	$ go test -test.v
 
-Tests take about 30 seconds and don't have a failure case. Sorry.
+Tests take about a minute and don't have a failure case. Sorry.
 
 License
 =======
