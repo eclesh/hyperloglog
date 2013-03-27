@@ -63,21 +63,21 @@ func (h *HyperLogLog) Reset() {
 	h.registers = make([]uint8, h.m)
 }
 
-// Calculate the position of the rightmost 1-bit.
+// Calculate the position of the leftmost 1-bit.
 func rho(val uint32, max uint32) uint8 {
-	r := 1
-	for val&1 == 0 && val <= max {
+	r := uint32(1)
+	for val&0x80000000 == 0 && r <= max {
 		r++
-		val >>= 1
+		val <<= 1
 	}
 	return uint8(r)
 }
 
-// Add to the count. val should be a 32 bit integer from a good hash
-// function.
+// Add to the count. val should be a 32 bit unsigned integer from a
+// good hash function.
 func (h *HyperLogLog) Add(val uint32) {
 	k := 32 - h.b
-	r := rho(val, k)
+	r := rho(val<<h.b, k)
 	j := val >> uint(k)
 	if r > h.registers[j] {
 		h.registers[j] = r
