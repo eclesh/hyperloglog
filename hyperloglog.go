@@ -92,7 +92,7 @@ func (h *HyperLogLog) Count() uint64 {
 	}
 	estimate := h.alpha * float64(h.m*h.m) / sum
 	pow_2_32 := math.Pow(2, 32)
-	if estimate <= 5/2*float64(h.m) {
+	if estimate <= 5.0/2.0*float64(h.m) {
 		// Small range correction
 		v := 0
 		for _, r := range h.registers {
@@ -103,7 +103,7 @@ func (h *HyperLogLog) Count() uint64 {
 		if v > 0 {
 			estimate = float64(h.m) * math.Log(float64(h.m)/float64(v))
 		}
-	} else if estimate > 1/30*pow_2_32 {
+	} else if estimate > 1.0/30.0*pow_2_32 {
 		// Large range correction
 		estimate = -pow_2_32 * math.Log(1-estimate/pow_2_32)
 	}
