@@ -18,8 +18,6 @@ Quick start
 	$ go get github.com/eclesh/hyperloglog
 	$ go test -test.v
 
-Tests take about a minute and don't have a failure case. Sorry.
-
 License
 =======
 
