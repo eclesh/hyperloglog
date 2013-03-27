@@ -13,6 +13,11 @@ import (
 	"math"
 )
 
+const (
+	pow_2_32     = 4294967296.0
+	neg_pow_2_32 = -4294967296.0
+)
+
 type HyperLogLog struct {
 	m         uint    // Number of registers
 	b         uint32  // Number of bits used to determine register index
@@ -88,10 +93,9 @@ func (h *HyperLogLog) Add(val uint32) {
 func (h *HyperLogLog) Count() uint64 {
 	sum := 0.0
 	for _, val := range h.registers {
-		sum += 1 / math.Pow(2, float64(val))
+		sum += 1.0 / math.Pow(2.0, float64(val))
 	}
 	estimate := h.alpha * float64(h.m*h.m) / sum
-	pow_2_32 := math.Pow(2, 32)
 	if estimate <= 5.0/2.0*float64(h.m) {
 		// Small range correction
 		v := 0
@@ -105,7 +109,7 @@ func (h *HyperLogLog) Count() uint64 {
 		}
 	} else if estimate > 1.0/30.0*pow_2_32 {
 		// Large range correction
-		estimate = -pow_2_32 * math.Log(1-estimate/pow_2_32)
+		estimate = neg_pow_2_32 * math.Log(1-estimate/pow_2_32)
 	}
 	return uint64(estimate)
 }
