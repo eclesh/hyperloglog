@@ -66,12 +66,12 @@ func testHyperLogLog(t *testing.T, n, low_b, high_b int) {
 		expected_error := 1.04 / math.Sqrt(float64(m))
 		actual_error := math.Abs(geterror(n_words, h.Count()))
 
-		t.Logf("m=%d: error=%.5f, expected <%.5f; actual=%d, estimated=%d\n",
-			m, actual_error, expected_error, n_words, h.Count())
-
 		if actual_error > expected_error {
 			bad++
+			t.Logf("m=%d: error=%.5f, expected <%.5f; actual=%d, estimated=%d\n",
+				m, actual_error, expected_error, n_words, h.Count())
 		}
+
 	}
 	t.Logf("%d of %d tests exceeded estimated error", bad, high_b-low_b)
 }
