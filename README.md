@@ -8,11 +8,9 @@ it is counting.
 
 For a full description of the algorithm, see the paper HyperLogLog:
 the analysis of a near-optimal cardinality estimation algorithm by
-Flajolet, et. al.[1]
+Flajolet, et. al. at http://algo.inria.fr/flajolet/Publications/FlFuGaMe07.pdf
 
 For documentation see http://godoc.org/github.com/eclesh/hyperloglog
-
-[1] http://algo.inria.fr/flajolet/Publications/FlFuGaMe07.pdf
 
 Quick start
 ===========
