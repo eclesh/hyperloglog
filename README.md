@@ -16,6 +16,7 @@ Quick start
 ===========
 
 	$ go get github.com/eclesh/hyperloglog
+	$ cd $GOPATH/src/github.com/eclesh/hyperloglog
 	$ go test -test.v
 
 License
