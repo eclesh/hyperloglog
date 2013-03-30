@@ -57,7 +57,7 @@ func New(registers uint) (*HyperLogLog, error) {
 	}
 	h := &HyperLogLog{}
 	h.m = registers
-	h.b = uint32(math.Log2(float64(registers)))
+	h.b = uint32(math.Ceil(math.Log2(float64(registers))))
 	h.alpha = get_alpha(registers)
 	h.Reset()
 	return h, nil
