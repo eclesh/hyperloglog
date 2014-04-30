@@ -52,7 +52,7 @@ func get_alpha(m uint) (result float64) {
 //     1.04 / sqrt(registers)
 //
 func New(registers uint) (*HyperLogLog, error) {
-	if registers%2 != 0 {
+	if (registers & (registers - 1)) != 0 {
 		return nil, fmt.Errorf("number of registers %d not a power of two", registers)
 	}
 	h := &HyperLogLog{}
