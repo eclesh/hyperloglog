@@ -13,9 +13,8 @@ import (
 	"math"
 )
 
-const (
-	pow_2_32     = 4294967296.0
-	neg_pow_2_32 = -4294967296.0
+var (
+	exp32 = math.Pow(2, 32)
 )
 
 type HyperLogLog struct {
@@ -107,9 +106,9 @@ func (h *HyperLogLog) Count() uint64 {
 		if v > 0 {
 			estimate = float64(h.m) * math.Log(float64(h.m)/float64(v))
 		}
-	} else if estimate > 1.0/30.0*pow_2_32 {
+	} else if estimate > 1.0/30.0*exp32 {
 		// Large range correction
-		estimate = neg_pow_2_32 * math.Log(1-estimate/pow_2_32)
+		estimate = -exp32 * math.Log(1-estimate/exp32)
 	}
 	return uint64(estimate)
 }
