@@ -83,3 +83,53 @@ func TestHyperLogLogSmall(t *testing.T) {
 func TestHyperLogLogBig(t *testing.T) {
 	testHyperLogLog(t, 0, 4, 17)
 }
+
+func benchmarkCount(b *testing.B, registers int) {
+	words := dictionary(0)
+	m := uint(math.Pow(2, float64(registers)))
+
+	h, err := New(m)
+	if err != nil {
+		return
+	}
+
+	hash := fnv.New32()
+	for _, word := range words {
+		hash.Write([]byte(word))
+		h.Add(hash.Sum32())
+		hash.Reset()
+	}
+
+	b.ResetTimer()
+	for n := 0; n < b.N; n++ {
+		h.Count()
+	}
+}
+
+func BenchmarkCount4(b *testing.B) {
+	benchmarkCount(b, 4)
+}
+
+func BenchmarkCount5(b *testing.B) {
+	benchmarkCount(b, 5)
+}
+
+func BenchmarkCount6(b *testing.B) {
+	benchmarkCount(b, 6)
+}
+
+func BenchmarkCount7(b *testing.B) {
+	benchmarkCount(b, 7)
+}
+
+func BenchmarkCount8(b *testing.B) {
+	benchmarkCount(b, 8)
+}
+
+func BenchmarkCount9(b *testing.B) {
+	benchmarkCount(b, 9)
+}
+
+func BenchmarkCount10(b *testing.B) {
+	benchmarkCount(b, 10)
+}
