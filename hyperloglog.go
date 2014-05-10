@@ -91,11 +91,12 @@ func (h *HyperLogLog) Add(val uint32) {
 // Get the estimated count.
 func (h *HyperLogLog) Count() uint64 {
 	sum := 0.0
+	m := float64(h.m)
 	for _, val := range h.registers {
 		sum += 1.0 / math.Pow(2.0, float64(val))
 	}
-	estimate := h.alpha * float64(h.m*h.m) / sum
-	if estimate <= 5.0/2.0*float64(h.m) {
+	estimate := h.alpha * m * m / sum
+	if estimate <= 5.0/2.0*m {
 		// Small range correction
 		v := 0
 		for _, r := range h.registers {
@@ -104,7 +105,7 @@ func (h *HyperLogLog) Count() uint64 {
 			}
 		}
 		if v > 0 {
-			estimate = float64(h.m) * math.Log(float64(h.m)/float64(v))
+			estimate = m * math.Log(m/float64(v))
 		}
 	} else if estimate > 1.0/30.0*exp32 {
 		// Large range correction
