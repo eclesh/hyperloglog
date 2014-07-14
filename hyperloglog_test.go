@@ -44,11 +44,11 @@ func geterror(actual uint64, estimate uint64) (result float64) {
 	return (float64(estimate) - float64(actual)) / float64(actual)
 }
 
-func testHyperLogLog(t *testing.T, n, low_b, high_b int) {
+func testHyperLogLog(t *testing.T, n, lowB, highB int) {
 	words := dictionary(n)
 	bad := 0
-	n_words := uint64(len(words))
-	for i := low_b; i < high_b; i++ {
+	nWords := uint64(len(words))
+	for i := lowB; i < highB; i++ {
 		m := uint(math.Pow(2, float64(i)))
 
 		h, err := New(m)
@@ -63,17 +63,17 @@ func testHyperLogLog(t *testing.T, n, low_b, high_b int) {
 			hash.Reset()
 		}
 
-		expected_error := 1.04 / math.Sqrt(float64(m))
-		actual_error := math.Abs(geterror(n_words, h.Count()))
+		expectedError := 1.04 / math.Sqrt(float64(m))
+		actualError := math.Abs(geterror(nWords, h.Count()))
 
-		if actual_error > expected_error {
+		if actualError > expectedError {
 			bad++
 			t.Logf("m=%d: error=%.5f, expected <%.5f; actual=%d, estimated=%d\n",
-				m, actual_error, expected_error, n_words, h.Count())
+				m, actualError, expectedError, nWords, h.Count())
 		}
 
 	}
-	t.Logf("%d of %d tests exceeded estimated error", bad, high_b-low_b)
+	t.Logf("%d of %d tests exceeded estimated error", bad, highB-lowB)
 }
 
 func TestHyperLogLogSmall(t *testing.T) {
