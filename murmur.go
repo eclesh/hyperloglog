@@ -56,3 +56,51 @@ func Murmur64(i uint64) uint32 {
 	h ^= h >> 16
 	return h
 }
+
+// Murmur128 implements a fast version of the murmur hash function for two uint64s
+// for little endian machines.  Suitable for adding a 128bit value to an HLL counter.
+func Murmur128(i, j uint64) uint32 {
+	var c1, c2 uint32 = 0xcc9e2d51, 0x1b873593
+	var h, k uint32
+	//first 4-byte chunk
+	k = uint32(i)
+	k *= c1
+	k = (k << 15) | (k >> (32 - 15))
+	k *= c2
+	h ^= k
+	h = (h << 13) | (h >> (32 - 13))
+	h = (h * 5) + 0xe6546b64
+	// second 4-byte chunk
+	k = uint32(i >> 32)
+	k *= c1
+	k = (k << 15) | (k >> (32 - 15))
+	k *= c2
+	h ^= k
+	h = (h << 13) | (h >> (32 - 13))
+	h = (h * 5) + 0xe6546b64
+	// third 4-byte chunk
+	k = uint32(j)
+	k *= c1
+	k = (k << 15) | (k >> (32 - 15))
+	k *= c2
+	h ^= k
+	h = (h << 13) | (h >> (32 - 13))
+	h = (h * 5) + 0xe6546b64
+	// fourth 4-byte chunk
+	k = uint32(j >> 32)
+	k *= c1
+	k = (k << 15) | (k >> (32 - 15))
+	k *= c2
+	h ^= k
+	h = (h << 13) | (h >> (32 - 13))
+	h = (h * 5) + 0xe6546b64
+	// second part
+	h ^= 16
+	h ^= h >> 16
+	h *= 0x85ebca6b
+	h ^= h >> 13
+	h *= 0xc2b2ae35
+	h ^= h >> 16
+	return h
+
+}
