@@ -5,7 +5,7 @@ import (
 	"math/rand"
 	"testing"
 
-	"github.com/reusee/mmh3"
+	"github.com/DataDog/mmh3"
 )
 
 var buf32 = make([]byte, 4)
