@@ -1,8 +1,64 @@
 package hyperloglog
 
+import (
+	"encoding/binary"
+)
+
 // This file implements the murmur3 32-bit hash on 32bit and 64bit integers
 // for little endian machines only with no heap allocation.  If you are using
 // HLL to count integer IDs on intel machines, this is your huckleberry.
+
+// MurmurString implements a fast version of the murmur hash function for strings
+// for little endian machines.  Suitable for adding strings to HLL counter.
+func MurmurString(key string) uint32 {
+	var c1, c2 uint32 = 0xcc9e2d51, 0x1b873593
+	var h, k uint32
+
+	bkey := []byte(key)
+	blen := len(bkey)
+
+	l := blen / 4 // chunk length
+	tail := bkey[l*4:]
+
+	// for each 4 byte chunk of `key'
+	for i := 0; i < l; i++ {
+		// next 4 byte chunk of `key'
+		k = binary.LittleEndian.Uint32(bkey[i*4:])
+
+		// encode next 4 byte chunk of `key'
+		k *= c1
+		k = (k << 15) | (k >> (32 - 15))
+		k *= c2
+		h ^= k
+		h = (h << 13) | (h >> (32 - 13))
+		h = (h * 5) + 0xe6546b64
+	}
+
+	k = 0
+	// remainder
+	switch len(tail) {
+	case 3:
+		k ^= uint32(tail[2]) << 16
+		fallthrough
+	case 2:
+		k ^= uint32(tail[1]) << 8
+		fallthrough
+	case 1:
+		k ^= uint32(tail[0])
+		k *= c1
+		k = (k << 15) | (k >> (32 - 15))
+		k *= c2
+		h ^= k
+	}
+
+	h ^= uint32(blen)
+	h ^= (h >> 16)
+	h *= 0x85ebca6b
+	h ^= (h >> 13)
+	h *= 0xc2b2ae35
+	h ^= (h >> 16)
+	return h
+}
 
 // Murmur32 implements a fast version of the murmur hash function for uint32 for
 // little endian machines.  Suitable for adding 32bit integers to a HLL counter.
