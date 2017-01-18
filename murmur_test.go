@@ -45,4 +45,22 @@ func TestMurmur(t *testing.T) {
 			t.Errorf("Hash mismatch on 128 bit %d,%d: expected 0x%X, got 0x%X\n", x, y, hash, m)
 		}
 	}
+
+	for i := 0; i < 100; i++ {
+		key := randString((i % 15) + 5)
+		hash := mmh3.Hash32([]byte(key))
+		m := MurmurString(key)
+		if hash != m {
+			t.Errorf("Hash mismatch on key %s: expected 0x%X, got 0x%X\n", key, hash, m)
+		}
+	}
+}
+
+func randString(n int) string {
+	letterRunes := []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
+	b := make([]rune, n)
+	for i := range b {
+		b[i] = letterRunes[rand.Intn(len(letterRunes))]
+	}
+	return string(b)
 }
