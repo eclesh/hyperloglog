@@ -14,9 +14,10 @@ func MurmurString(key string) uint32 {
 	var c1, c2 uint32 = 0xcc9e2d51, 0x1b873593
 	var h, k uint32
 
-	bkey := []byte(key)
-	blen := len(bkey)
+	bkey := make([]byte, len(key))
+	copy(bkey[:], key)
 
+	blen := len(bkey)
 	l := blen / 4 // chunk length
 	tail := bkey[l*4:]
 
