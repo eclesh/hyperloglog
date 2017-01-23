@@ -16,12 +16,9 @@ func MurmurString(key string) uint32 {
 	blen := len(bkey)
 	l := blen / 4 // chunk length
 
-	// for each 4 byte chunk of `key'
+	// encode each 4 byte chunk of `key'
 	for i := 0; i < l; i++ {
-		// next 4 byte chunk of `key'
 		k = *(*uint32)(unsafe.Pointer(&bkey[i*4]))
-
-		// encode next 4 byte chunk of `key'
 		k *= c1
 		k = (k << 15) | (k >> (32 - 15))
 		k *= c2
@@ -31,21 +28,23 @@ func MurmurString(key string) uint32 {
 	}
 
 	k = 0
-	// remainder
-	tail := bkey[l*4:]
-	switch blen % 4 {
-	case 3:
-		k ^= uint32(tail[2]) << 16
-		fallthrough
-	case 2:
-		k ^= uint32(tail[1]) << 8
-		fallthrough
-	case 1:
-		k ^= uint32(tail[0])
-		k *= c1
-		k = (k << 15) | (k >> (32 - 15))
-		k *= c2
-		h ^= k
+	//remainder
+	if mod := blen % 4; mod > 0 {
+		btail := *(*uint32)(unsafe.Pointer(&bkey[l*4]))
+		switch mod {
+		case 3:
+			k ^= ((btail >> 16) & 0x0000FFFF) << 16
+			fallthrough
+		case 2:
+			k ^= ((btail >> 8) & 0x000000FF) << 8
+			fallthrough
+		case 1:
+			k ^= btail & 0x000000FF
+			k *= c1
+			k = (k << 15) | (k >> (32 - 15))
+			k *= c2
+			h ^= k
+		}
 	}
 
 	h ^= uint32(blen)
