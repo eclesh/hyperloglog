@@ -33,7 +33,7 @@ func MurmurString(key string) uint32 {
 		btail := *(*uint32)(unsafe.Pointer(&bkey[l*4]))
 		switch mod {
 		case 3:
-			k ^= ((btail >> 16) & 0x0000FFFF) << 16
+			k ^= ((btail >> 16) & 0x000000FF) << 16
 			fallthrough
 		case 2:
 			k ^= ((btail >> 8) & 0x000000FF) << 8
