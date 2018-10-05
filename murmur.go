@@ -1,7 +1,9 @@
 package hyperloglog
 
 import (
-	"encoding/binary"
+	"reflect"
+	"runtime"
+	"unsafe"
 )
 
 // This file implements the murmur3 32-bit hash on 32bit and 64bit integers
@@ -14,7 +16,15 @@ func MurmurString(key string) uint32 {
 	var c1, c2 uint32 = 0xcc9e2d51, 0x1b873593
 	var h, k uint32
 
-	bkey := []byte(key)
+	// Reinterpret the string as a `StringHeader`. This comes with three important caveats:
+	// 1. We must never write through the pointer derived. Golang strings are immutable and we cannot
+	//    break that assumption.
+	// 2. Golang continues to have a non-moving GC. This only works because the Golang GC is
+	//    (currently) non-moving. There are no plans to break this yet, but it remains a caveat.
+	// 3. `key` is used after the `StringHeader` is no longer needed. Currently, `runtime.KeepAlive`
+	//    is used as a no-op use.
+	sh := (*reflect.StringHeader)(unsafe.Pointer(&key))
+	bkey := *(*[]byte)(unsafe.Pointer(sh))
 	blen := len(bkey)
 
 	l := blen / 4 // chunk length
@@ -23,7 +33,7 @@ func MurmurString(key string) uint32 {
 	// for each 4 byte chunk of `key'
 	for i := 0; i < l; i++ {
 		// next 4 byte chunk of `key'
-		k = binary.LittleEndian.Uint32(bkey[i*4:])
+		k = *(*uint32)(unsafe.Pointer(&bkey[i*4]))
 
 		// encode next 4 byte chunk of `key'
 		k *= c1
@@ -57,6 +67,9 @@ func MurmurString(key string) uint32 {
 	h ^= (h >> 13)
 	h *= 0xc2b2ae35
 	h ^= (h >> 16)
+
+	runtime.KeepAlive(&key)
+
 	return h
 }
 
