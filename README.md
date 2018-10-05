@@ -10,13 +10,16 @@ For a full description of the algorithm, see the paper HyperLogLog:
 the analysis of a near-optimal cardinality estimation algorithm by
 Flajolet, et. al. at http://algo.inria.fr/flajolet/Publications/FlFuGaMe07.pdf
 
-For documentation see http://godoc.org/github.com/eclesh/hyperloglog
+For documentation see http://godoc.org/github.com/DataDog/hyperloglog
+
+Included are a set of fast implementations for murmurhash suitable for use
+on 32 and 64 bit integers on little endian machines.
 
 Quick start
 ===========
 
-	$ go get github.com/eclesh/hyperloglog
-	$ cd $GOPATH/src/github.com/eclesh/hyperloglog
+	$ go get github.com/DataDog/hyperloglog
+	$ cd $GOPATH/src/github.com/DataDog/hyperloglog
 	$ go test -test.v
 	$ go test -bench=.
 

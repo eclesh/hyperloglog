@@ -17,15 +17,17 @@ var (
 	exp32 = math.Pow(2, 32)
 )
 
+// A HyperLogLog is a deterministic cardinality estimator.  This version
+// exports its fields so that it is suitable for saving eg. to a database.
 type HyperLogLog struct {
-	m         uint    // Number of registers
-	b         uint32  // Number of bits used to determine register index
-	alpha     float64 // Bias correction constant
-	registers []uint8
+	M         uint    // Number of registers
+	B         uint32  // Number of bits used to determine register index
+	Alpha     float64 // Bias correction constant
+	Registers []uint8
 }
 
 // Compute bias correction alpha_m.
-func get_alpha(m uint) (result float64) {
+func getAlpha(m uint) (result float64) {
 	switch m {
 	case 16:
 		result = 0.673
@@ -39,7 +41,7 @@ func get_alpha(m uint) (result float64) {
 	return result
 }
 
-// Return a new HyperLogLog with the given number of registers. More
+// New creates a HyperLogLog with the given number of registers. More
 // registers leads to lower error in your estimated count, at the
 // expense of memory.
 //
@@ -55,16 +57,16 @@ func New(registers uint) (*HyperLogLog, error) {
 		return nil, fmt.Errorf("number of registers %d not a power of two", registers)
 	}
 	h := &HyperLogLog{}
-	h.m = registers
-	h.b = uint32(math.Ceil(math.Log2(float64(registers))))
-	h.alpha = get_alpha(registers)
+	h.M = registers
+	h.B = uint32(math.Ceil(math.Log2(float64(registers))))
+	h.Alpha = getAlpha(registers)
 	h.Reset()
 	return h, nil
 }
 
 // Reset all internal variables and set the count to zero.
 func (h *HyperLogLog) Reset() {
-	h.registers = make([]uint8, h.m)
+	h.Registers = make([]uint8, h.M)
 }
 
 // Calculate the position of the leftmost 1-bit.
@@ -80,26 +82,26 @@ func rho(val uint32, max uint32) uint8 {
 // Add to the count. val should be a 32 bit unsigned integer from a
 // good hash function.
 func (h *HyperLogLog) Add(val uint32) {
-	k := 32 - h.b
-	r := rho(val<<h.b, k)
+	k := 32 - h.B
+	r := rho(val<<h.B, k)
 	j := val >> uint(k)
-	if r > h.registers[j] {
-		h.registers[j] = r
+	if r > h.Registers[j] {
+		h.Registers[j] = r
 	}
 }
 
-// Get the estimated count.
+// Count returns the estimated cardinality.
 func (h *HyperLogLog) Count() uint64 {
 	sum := 0.0
-	m := float64(h.m)
-	for _, val := range h.registers {
+	m := float64(h.M)
+	for _, val := range h.Registers {
 		sum += 1.0 / math.Pow(2.0, float64(val))
 	}
-	estimate := h.alpha * m * m / sum
+	estimate := h.Alpha * m * m / sum
 	if estimate <= 5.0/2.0*m {
 		// Small range correction
 		v := 0
-		for _, r := range h.registers {
+		for _, r := range h.Registers {
 			if r == 0 {
 				v++
 			}
@@ -116,14 +118,14 @@ func (h *HyperLogLog) Count() uint64 {
 
 // Merge another HyperLogLog into this one. The number of registers in
 // each must be the same.
-func (h1 *HyperLogLog) Merge(h2 *HyperLogLog) error {
-	if h1.m != h2.m {
+func (h *HyperLogLog) Merge(other *HyperLogLog) error {
+	if h.M != other.M {
 		return fmt.Errorf("number of registers doesn't match: %d != %d",
-			h1.m, h2.m)
+			h.M, other.M)
 	}
-	for j, r := range h2.registers {
-		if r > h1.registers[j] {
-			h1.registers[j] = r
+	for j, r := range other.Registers {
+		if r > h.Registers[j] {
+			h.Registers[j] = r
 		}
 	}
 	return nil
