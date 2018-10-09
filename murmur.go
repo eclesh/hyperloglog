@@ -1,8 +1,6 @@
 package hyperloglog
 
 import (
-	"reflect"
-	"runtime"
 	"unsafe"
 )
 
@@ -16,15 +14,8 @@ func MurmurString(key string) uint32 {
 	var c1, c2 uint32 = 0xcc9e2d51, 0x1b873593
 	var h, k uint32
 
-	// Reinterpret the string as a `StringHeader`. This comes with three important caveats:
-	// 1. We must never write through the pointer derived. Golang strings are immutable and we cannot
-	//    break that assumption.
-	// 2. Golang continues to have a non-moving GC. This only works because the Golang GC is
-	//    (currently) non-moving. There are no plans to break this yet, but it remains a caveat.
-	// 3. `key` is used after the `StringHeader` is no longer needed. Currently, `runtime.KeepAlive`
-	//    is used as a no-op use.
-	sh := (*reflect.StringHeader)(unsafe.Pointer(&key))
-	bkey := *(*[]byte)(unsafe.Pointer(sh))
+	// Reinterpret the string as bytes. This is safe because we don't write into the byte array.
+	bkey := *(*[]byte)(unsafe.Pointer(&key))
 	blen := len(bkey)
 
 	l := blen / 4 // chunk length
@@ -67,8 +58,6 @@ func MurmurString(key string) uint32 {
 	h ^= (h >> 13)
 	h *= 0xc2b2ae35
 	h ^= (h >> 16)
-
-	runtime.KeepAlive(&key)
 
 	return h
 }
