@@ -4,6 +4,7 @@ import (
 	"encoding/binary"
 	"math/rand"
 	"testing"
+	"unsafe"
 
 	"github.com/DataDog/mmh3"
 )
@@ -63,4 +64,57 @@ func randString(n int) string {
 		b[i] = letterRunes[rand.Intn(len(letterRunes))]
 	}
 	return string(b)
+}
+
+// Benchmarks
+func benchmarkMurmer64(b *testing.B, input []uint64) {
+	b.ResetTimer()
+	for n := 0; n < b.N; n++ {
+		for _, x := range input {
+			Murmur64(x)
+		}
+	}
+}
+
+func benchmarkMurmerString(b *testing.B, input []string) {
+	b.ResetTimer()
+	for n := 0; n < b.N; n++ {
+		for _, x := range input {
+			MurmurString(x)
+		}
+	}
+}
+
+func benchmarkHash32(b *testing.B, input []string) {
+	b.ResetTimer()
+	for n := 0; n < b.N; n++ {
+		for _, x := range input {
+			b := *(*[]byte)(unsafe.Pointer(&x))
+			mmh3.Hash32(b)
+		}
+	}
+}
+
+func Benchmark100Murmer64(b *testing.B) {
+	input := make([]uint64, 100)
+	for i := 0; i < 100; i++ {
+		input[i] = uint64(rand.Int63())
+	}
+	benchmarkMurmer64(b, input)
+}
+
+func Benchmark100MurmerString(b *testing.B) {
+	input := make([]string, 100)
+	for i := 0; i < 100; i++ {
+		input[i] = randString((i % 15) + 5)
+	}
+	benchmarkMurmerString(b, input)
+}
+
+func Benchmark100Hash32(b *testing.B) {
+	input := make([]string, 100)
+	for i := 0; i < 100; i++ {
+		input[i] = randString((i % 15) + 5)
+	}
+	benchmarkHash32(b, input)
 }
