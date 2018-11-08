@@ -11,13 +11,18 @@ import (
 // MurmurString implements a fast version of the murmur hash function for strings
 // for little endian machines.  Suitable for adding strings to HLL counter.
 func MurmurString(key string) uint32 {
+	// Reinterpret the string as bytes. This is safe because we don't write into the byte array.
+	bkey := *(*[]byte)(unsafe.Pointer(&key))
+	return MurmurBytes(bkey)
+}
+
+// MurmurBytes implements a fast version of the murmur hash function for bytes
+// for little endian machines.  Suitable for adding strings to HLL counter.
+func MurmurBytes(bkey []byte) uint32 {
 	var c1, c2 uint32 = 0xcc9e2d51, 0x1b873593
 	var h, k uint32
 
-	// Reinterpret the string as bytes. This is safe because we don't write into the byte array.
-	bkey := *(*[]byte)(unsafe.Pointer(&key))
 	blen := len(bkey)
-
 	l := blen / 4 // chunk length
 	tail := bkey[l*4:]
 
