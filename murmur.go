@@ -1,6 +1,7 @@
 package hyperloglog
 
 import (
+	"reflect"
 	"unsafe"
 )
 
@@ -12,8 +13,13 @@ import (
 // for little endian machines.  Suitable for adding strings to HLL counter.
 func MurmurString(key string) uint32 {
 	// Reinterpret the string as bytes. This is safe because we don't write into the byte array.
-	bkey := *(*[]byte)(unsafe.Pointer(&key))
-	return MurmurBytes(bkey)
+	b := make([]byte, 0)
+	bHeader := (*reflect.SliceHeader)(unsafe.Pointer(&b))
+	sHeader := (*reflect.StringHeader)(unsafe.Pointer(&key))
+	bHeader.Data = sHeader.Data
+	bHeader.Len = sHeader.Len
+	bHeader.Cap = sHeader.Len
+	return MurmurBytes(b)
 }
 
 // MurmurBytes implements a fast version of the murmur hash function for bytes
