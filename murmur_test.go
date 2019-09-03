@@ -7,6 +7,7 @@ import (
 	"unsafe"
 
 	"github.com/DataDog/mmh3"
+	"github.com/dustin/randbo"
 )
 
 var buf32 = make([]byte, 4)
@@ -57,6 +58,22 @@ func TestMurmur(t *testing.T) {
 	}
 }
 
+func TestMurmurBytes(t *testing.T) {
+	b := []byte("hello")
+	v := MurmurBytes(b)
+	if v != 613153351 {
+		t.Fatalf("MurmurBytes failed for %s: %v != %v", b, v, 613153351)
+	}
+}
+
+func TestMurmurString(t *testing.T) {
+	s := "hello"
+	v := MurmurString(s)
+	if v != 613153351 {
+		t.Fatalf("MurmurString failed for %s: %v != %v", s, v, 613153351)
+	}
+}
+
 func randString(n int) string {
 	letterRunes := []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
 	b := make([]rune, n)
@@ -67,7 +84,7 @@ func randString(n int) string {
 }
 
 // Benchmarks
-func benchmarkMurmer64(b *testing.B, input []uint64) {
+func benchmarkMurmur64(b *testing.B, input []uint64) {
 	b.ResetTimer()
 	for n := 0; n < b.N; n++ {
 		for _, x := range input {
@@ -76,7 +93,7 @@ func benchmarkMurmer64(b *testing.B, input []uint64) {
 	}
 }
 
-func benchmarkMurmerString(b *testing.B, input []string) {
+func benchmarkMurmurString(b *testing.B, input []string) {
 	b.ResetTimer()
 	for n := 0; n < b.N; n++ {
 		for _, x := range input {
@@ -95,20 +112,20 @@ func benchmarkHash32(b *testing.B, input []string) {
 	}
 }
 
-func Benchmark100Murmer64(b *testing.B) {
+func Benchmark100Murmur64(b *testing.B) {
 	input := make([]uint64, 100)
 	for i := 0; i < 100; i++ {
 		input[i] = uint64(rand.Int63())
 	}
-	benchmarkMurmer64(b, input)
+	benchmarkMurmur64(b, input)
 }
 
-func Benchmark100MurmerString(b *testing.B) {
+func Benchmark100MurmurString(b *testing.B) {
 	input := make([]string, 100)
 	for i := 0; i < 100; i++ {
 		input[i] = randString((i % 15) + 5)
 	}
-	benchmarkMurmerString(b, input)
+	benchmarkMurmurString(b, input)
 }
 
 func Benchmark100Hash32(b *testing.B) {
@@ -117,4 +134,19 @@ func Benchmark100Hash32(b *testing.B) {
 		input[i] = randString((i % 15) + 5)
 	}
 	benchmarkHash32(b, input)
+}
+
+func BenchmarkMurmurStringBig(b *testing.B) {
+	// Make a 100Mb string and use that as a benchmark
+	r := randbo.New()
+	slice := make([]byte, 100*1024*1024)
+	_, err := r.Read(slice)
+	if err != nil {
+		b.Fatalf("Failed to create benchmark data: %s", err)
+	}
+	s := string(slice)
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		MurmurString(s)
+	}
 }

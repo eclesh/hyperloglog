@@ -84,22 +84,6 @@ func TestHyperLogLogBig(t *testing.T) {
 	testHyperLogLog(t, 0, 4, 17)
 }
 
-func TestMurmurBytes(t *testing.T) {
-	b := []byte("hello")
-	v := MurmurBytes(b)
-	if v != 613153351 {
-		t.Fatalf("MurmurBytes failed for %s: %v != %v", b, v, 613153351)
-	}
-}
-
-func TestMurmurString(t *testing.T) {
-	s := "hello"
-	v := MurmurString(s)
-	if v != 613153351 {
-		t.Fatalf("MurmurBytes failed for %s: %v != %v", s, v, 613153351)
-	}
-}
-
 func benchmarkCount(b *testing.B, registers int) {
 	words := dictionary(0)
 	m := uint(math.Pow(2, float64(registers)))
