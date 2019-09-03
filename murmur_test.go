@@ -57,6 +57,22 @@ func TestMurmur(t *testing.T) {
 	}
 }
 
+func TestMurmurBytes(t *testing.T) {
+	b := []byte("hello")
+	v := MurmurBytes(b)
+	if v != 613153351 {
+		t.Fatalf("MurmurBytes failed for %s: %v != %v", b, v, 613153351)
+	}
+}
+
+func TestMurmurString(t *testing.T) {
+	s := "hello"
+	v := MurmurString(s)
+	if v != 613153351 {
+		t.Fatalf("MurmurBytes failed for %s: %v != %v", s, v, 613153351)
+	}
+}
+
 func randString(n int) string {
 	letterRunes := []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
 	b := make([]rune, n)
