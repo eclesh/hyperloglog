@@ -7,6 +7,7 @@ import (
 	"unsafe"
 
 	"github.com/DataDog/mmh3"
+	"github.com/dustin/randbo"
 )
 
 var buf32 = make([]byte, 4)
@@ -133,4 +134,19 @@ func Benchmark100Hash32(b *testing.B) {
 		input[i] = randString((i % 15) + 5)
 	}
 	benchmarkHash32(b, input)
+}
+
+func BenchmarkMurmurStringBig(b *testing.B) {
+	// Make a 100Mb string and use that as a benchmark
+	r := randbo.New()
+	slice := make([]byte, 100*1024*1024)
+	_, err := r.Read(slice)
+	if err != nil {
+		b.Fatalf("Failed to create benchmark data: %s", err)
+	}
+	s := string(slice)
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		MurmurString(s)
+	}
 }
