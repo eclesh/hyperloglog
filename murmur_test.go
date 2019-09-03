@@ -74,6 +74,14 @@ func TestMurmurString(t *testing.T) {
 	}
 }
 
+func TestMurmurStringZero(t *testing.T) {
+	s := ""
+	v := MurmurString(s)
+	if v != 0 {
+		t.Fatalf("MurmurString failed for %s: %v != %v", s, v, 0)
+	}
+}
+
 func randString(n int) string {
 	letterRunes := []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
 	b := make([]rune, n)
