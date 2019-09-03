@@ -13,6 +13,9 @@ import (
 // MurmurString implements a fast version of the murmur hash function for strings
 // for little endian machines.  Suitable for adding strings to HLL counter.
 func MurmurString(key string) uint32 {
+	if len(key) == 0 {
+		return MurmurBytes(nil)
+	}
 	// Reinterpret the string as bytes. This is safe because we don't write into the byte array.
 	sh := (*reflect.StringHeader)(unsafe.Pointer(&key))
 	byteSlice := (*[math.MaxInt32 - 1]byte)(unsafe.Pointer(sh.Data))[:sh.Len:sh.Len]
