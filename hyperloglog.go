@@ -49,9 +49,9 @@ func getAlpha(m uint) (result float64) {
 // of memory you're willing to use and the error you're willing to
 // tolerate. Each register uses one byte of memory.
 //
-// Approximate error will be:
-//     1.04 / sqrt(registers)
-//
+// Standard error will be: σ ≈ 1.04 / sqrt(registers)
+// The estimates provided by hyperloglog are expected to be within σ, 2σ, 3σ
+// of the exact count in respectively 65%, 95%, 99% of all the cases.
 func New(registers uint) (*HyperLogLog, error) {
 	if (registers & (registers - 1)) != 0 {
 		return nil, fmt.Errorf("number of registers %d not a power of two", registers)
