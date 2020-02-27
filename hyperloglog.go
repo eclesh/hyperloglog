@@ -60,7 +60,7 @@ func New(registers uint) (*HyperLogLog, error) {
 	h.M = registers
 	h.B = uint32(math.Ceil(math.Log2(float64(registers))))
 	h.Alpha = getAlpha(registers)
-	h.Reset()
+	h.Registers = make([]uint8, h.M)
 	return h, nil
 }
 
