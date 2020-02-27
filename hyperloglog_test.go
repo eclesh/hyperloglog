@@ -6,6 +6,7 @@ import (
 	"hash/fnv"
 	"io"
 	"math"
+	"math/rand"
 	"os"
 	"testing"
 )
@@ -82,6 +83,30 @@ func TestHyperLogLogSmall(t *testing.T) {
 
 func TestHyperLogLogBig(t *testing.T) {
 	testHyperLogLog(t, 0, 4, 17)
+}
+
+func testReset(t *testing.T, m uint, numObjects, runs int) {
+	rand.Seed(101)
+
+	h, err := New(m)
+	if err != nil {
+		t.Fatalf("can't make New(%d): %v", m, err)
+	}
+
+	for i := 0; i < runs; i++ {
+		for j := 0; j < numObjects; j++ {
+			h.Add(rand.Uint32())
+		}
+		h.Reset()
+
+		if h.Count() != 0 {
+			t.Errorf("reset failed, count=%d", h.Count())
+		}
+	}
+}
+
+func TestReset(t *testing.T) {
+	testReset(t, 512, 1_000_000, 10)
 }
 
 func benchmarkCount(b *testing.B, registers int) {
