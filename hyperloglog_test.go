@@ -97,10 +97,16 @@ func testReset(t *testing.T, m uint, numObjects, runs int) {
 		for j := 0; j < numObjects; j++ {
 			h.Add(rand.Uint32())
 		}
-		h.Reset()
 
-		if h.Count() != 0 {
-			t.Errorf("reset failed, count=%d", h.Count())
+		oldRegisters := &h.Registers
+		h.Reset()
+		if oldRegisters != &h.Registers {
+			t.Error("registers were reallocated")
+		}
+		for _, r := range h.Registers {
+			if r != 0 {
+				t.Error("register is not zeroed out after reset")
+			}
 		}
 	}
 }
