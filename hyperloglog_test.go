@@ -111,8 +111,26 @@ func testReset(t *testing.T, m uint, numObjects, runs int) {
 	}
 }
 
+func benchmarkReset(b *testing.B, h *HyperLogLog, numObjects int) {
+	for n := 0; n < b.N; n++ {
+		for i := 0; i < numObjects; i++ {
+			h.Add(uint32(i))
+		}
+		h.Reset()
+	}
+}
+
 func TestReset(t *testing.T) {
 	testReset(t, 512, 1_000_000, 10)
+}
+
+func BenchmarkReset(b *testing.B) {
+	h, err := New(256)
+	if err != nil {
+		b.Fatalf("can't make New(256): %v", err)
+	}
+
+	benchmarkReset(b, h, 1000)
 }
 
 func benchmarkCount(b *testing.B, registers int) {
