@@ -124,6 +124,8 @@ func BenchmarkReset(b *testing.B) {
 		b.Fatalf("can't make New(%d): %v", m, err)
 	}
 
+	b.ResetTimer()
+
 	for n := 0; n < b.N; n++ {
 		for i := 0; i < numObjects; i++ {
 			h.Add(uint32(i))
