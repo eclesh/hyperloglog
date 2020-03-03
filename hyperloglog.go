@@ -60,13 +60,15 @@ func New(registers uint) (*HyperLogLog, error) {
 	h.M = registers
 	h.B = uint32(math.Ceil(math.Log2(float64(registers))))
 	h.Alpha = getAlpha(registers)
-	h.Reset()
+	h.Registers = make([]uint8, h.M)
 	return h, nil
 }
 
 // Reset all internal variables and set the count to zero.
 func (h *HyperLogLog) Reset() {
-	h.Registers = make([]uint8, h.M)
+	for i := range h.Registers {
+		h.Registers[i] = 0
+	}
 }
 
 // Calculate the position of the leftmost 1-bit.

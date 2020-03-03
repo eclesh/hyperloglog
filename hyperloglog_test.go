@@ -6,6 +6,7 @@ import (
 	"hash/fnv"
 	"io"
 	"math"
+	"math/rand"
 	"os"
 	"testing"
 )
@@ -82,6 +83,55 @@ func TestHyperLogLogSmall(t *testing.T) {
 
 func TestHyperLogLogBig(t *testing.T) {
 	testHyperLogLog(t, 0, 4, 17)
+}
+
+func testReset(t *testing.T, m uint, numObjects, runs int) {
+	rand.Seed(101)
+
+	h, err := New(m)
+	if err != nil {
+		t.Fatalf("can't make New(%d): %v", m, err)
+	}
+
+	for i := 0; i < runs; i++ {
+		for j := 0; j < numObjects; j++ {
+			h.Add(rand.Uint32())
+		}
+
+		oldRegisters := &h.Registers
+		h.Reset()
+		if oldRegisters != &h.Registers {
+			t.Error("registers were reallocated")
+		}
+		for _, r := range h.Registers {
+			if r != 0 {
+				t.Error("register is not zeroed out after reset")
+			}
+		}
+	}
+}
+
+func TestReset(t *testing.T) {
+	testReset(t, 512, 1_000_000, 10)
+}
+
+func BenchmarkReset(b *testing.B) {
+	m := uint(256)
+	numObjects := 1000
+
+	h, err := New(m)
+	if err != nil {
+		b.Fatalf("can't make New(%d): %v", m, err)
+	}
+
+	b.ResetTimer()
+
+	for n := 0; n < b.N; n++ {
+		for i := 0; i < numObjects; i++ {
+			h.Add(uint32(i))
+		}
+		h.Reset()
+	}
 }
 
 func benchmarkCount(b *testing.B, registers int) {
