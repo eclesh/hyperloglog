@@ -35,7 +35,8 @@ func MurmurBytes(bkey []byte) uint32 {
 	// for each 4 byte chunk of `key'
 	for i := 0; i < l; i++ {
 		// next 4 byte chunk of `key'
-		k = *(*uint32)(unsafe.Pointer(&bkey[i*4]))
+		data := bkey[i*4 : (i*4)+4]
+		k := uint32(data[0]) | uint32(data[1])<<8 | uint32(data[2])<<16 | uint32(data[3])<<24
 
 		// encode next 4 byte chunk of `key'
 		k *= c1
