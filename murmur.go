@@ -2,6 +2,7 @@ package hyperloglog
 
 import (
 	"math"
+	"math/bits"
 	"reflect"
 	"unsafe"
 )
@@ -26,49 +27,48 @@ func MurmurString(key string) uint32 {
 // for little endian machines.  Suitable for adding strings to HLL counter.
 func MurmurBytes(bkey []byte) uint32 {
 	var c1, c2 uint32 = 0xcc9e2d51, 0x1b873593
-	var h, k uint32
+	var h uint32
 
 	blen := len(bkey)
-	l := blen / 4 // chunk length
-	tail := bkey[l*4:]
+	chunks := blen / 4 // chunk length
 
-	// for each 4 byte chunk of `key'
-	for i := 0; i < l; i++ {
-		// next 4 byte chunk of `key'
-		k = *(*uint32)(unsafe.Pointer(&bkey[i*4]))
+	values := (*(*[]uint32)(unsafe.Pointer(&bkey)))[:chunks:chunks]
 
-		// encode next 4 byte chunk of `key'
+	for _, k := range values {
 		k *= c1
-		k = (k << 15) | (k >> (32 - 15))
+		k = bits.RotateLeft32(k, 15)
 		k *= c2
+
 		h ^= k
-		h = (h << 13) | (h >> (32 - 13))
+		h = bits.RotateLeft32(h, 13)
 		h = (h * 5) + 0xe6546b64
 	}
 
-	k = 0
+	var k uint32
+	tailLength := blen % 4
+	tailStart := blen - tailLength
 	// remainder
-	switch len(tail) {
+	switch tailLength {
 	case 3:
-		k ^= uint32(tail[2]) << 16
+		k ^= uint32(bkey[tailStart+2]) << 16
 		fallthrough
 	case 2:
-		k ^= uint32(tail[1]) << 8
+		k ^= uint32(bkey[tailStart+1]) << 8
 		fallthrough
 	case 1:
-		k ^= uint32(tail[0])
+		k ^= uint32(bkey[tailStart])
 		k *= c1
-		k = (k << 15) | (k >> (32 - 15))
+		k = bits.RotateLeft32(k, 15)
 		k *= c2
 		h ^= k
 	}
 
 	h ^= uint32(blen)
-	h ^= (h >> 16)
+	h ^= h >> 16
 	h *= 0x85ebca6b
-	h ^= (h >> 13)
+	h ^= h >> 13
 	h *= 0xc2b2ae35
-	h ^= (h >> 16)
+	h ^= h >> 16
 
 	return h
 }
