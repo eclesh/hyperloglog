@@ -111,10 +111,9 @@ func (h *HyperLogLog) Count() uint64 {
 		if v > 0 {
 			estimate = m * math.Log(m/float64(v))
 		}
-	} else if estimate > 1.0/30.0*exp32 {
-		// Large range correction
-		estimate = -exp32 * math.Log(1-estimate/exp32)
 	}
+	// Not applying the large range correction proposed by Flajolet et al. as it leads to
+	// significant overcounting. See https://github.com/DataDog/hyperloglog/pull/15
 	return uint64(estimate)
 }
 
