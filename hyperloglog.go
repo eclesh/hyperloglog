@@ -94,6 +94,19 @@ func (h *HyperLogLog) Add(val uint32) {
 
 // Count returns the estimated cardinality.
 func (h *HyperLogLog) Count() uint64 {
+	return h.count(true)
+}
+
+// CountWithoutLargeRangeCorrection returns the estimated cardinality, without applying
+// the large range correction proposed by Flajolet et al. as it can lead to significant
+// overcounting.
+//
+// See https://github.com/DataDog/hyperloglog/pull/15
+func (h *HyperLogLog) CountWithoutLargeRangeCorrection() uint64 {
+	return h.count(false)
+}
+
+func (h *HyperLogLog) count(withLargeRangeCorrection bool) uint64 {
 	sum := 0.0
 	m := float64(h.M)
 	for _, val := range h.Registers {
@@ -111,9 +124,10 @@ func (h *HyperLogLog) Count() uint64 {
 		if v > 0 {
 			estimate = m * math.Log(m/float64(v))
 		}
+	} else if estimate > 1.0/30.0*exp32 && withLargeRangeCorrection {
+		// Large range correction
+		estimate = -exp32 * math.Log(1-estimate/exp32)
 	}
-	// Not applying the large range correction proposed by Flajolet et al. as it leads to
-	// significant overcounting. See https://github.com/DataDog/hyperloglog/pull/15
 	return uint64(estimate)
 }
 
